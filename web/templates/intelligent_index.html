@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Dashboard</title>
+    <!-- Chart.js for stock graph -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+            background: #18181b;
+            color: #f3f4f6;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+            color: #f3f4f6;
+        }
+        .header h1 {
+            font-size: 2.7rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        .header p {
+            font-size: 1.15rem;
+            opacity: 0.85;
+        }
+        .card {
+            background: #232326;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+            margin-bottom: 32px;
+            padding: 28px;
+            transition: box-shadow 0.2s;
+        }
+        .card:hover {
+            box-shadow: 0 8px 32px rgba(0,0,0,0.28);
+        }
+        .card h2 {
+            color: #e5e7eb;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.35rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+        .stat-card {
+            background: #232326;
+            padding: 18px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #4f8ef7;
+        }
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #f3f4f6;
+        }
+        .stat-label {
+            color: #a1a1aa;
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+            align-items: center;
+        }
+        .btn {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s, box-shadow 0.2s;
+            font-size: 1rem;
+        }
+        .btn-start {
+            background: linear-gradient(90deg, #4f8ef7 0%, #38a169 100%);
+            color: #fff;
+        }
+        .btn-start:hover {
+            box-shadow: 0 2px 8px rgba(72, 187, 120, 0.18);
+        }
+        .btn-stop {
+            background: linear-gradient(90deg, #e53e3e 0%, #f56565 100%);
+            color: #fff;
+        }
+        .btn-stop:hover {
+            box-shadow: 0 2px 8px rgba(245, 101, 101, 0.18);
+        }
+        .btn-secondary {
+            background: linear-gradient(90deg, #4f8ef7 0%, #764ba2 100%);
+            color: #fff;
+        }
+        select, input {
+            padding: 9px;
+            border: 2px solid #232326;
+            border-radius: 5px;
+            font-size: 1rem;
+            background: #18181b;
+            color: #f3f4f6;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: #4f8ef7;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-running {
+            background: #38a169;
+            animation: pulse 2s infinite;
+        }
+        .status-stopped {
+            background: #e53e3e;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .alert {
+            padding: 13px;
+            border-radius: 7px;
+            margin-bottom: 18px;
+            display: none;
+        }
+        .alert-success {
+            background: #232326;
+            color: #38a169;
+            border-left: 4px solid #38a169;
+        }
+        .alert-error {
+            background: #232326;
+            color: #e53e3e;
+            border-left: 4px solid #e53e3e;
+        }
+        .indicators-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+        .indicator-card {
+            background: #232326;
+            padding: 12px;
+            border-radius: 7px;
+            border-left: 4px solid #4f8ef7;
+        }
+        .indicator-name {
+            font-weight: 600;
+            color: #e5e7eb;
+            font-size: 0.95rem;
+        }
+        .indicator-value {
+            font-size: 1.15rem;
+            color: #f3f4f6;
+            margin-top: 4px;
+        }
+        .risk-card {
+            background: #232326;
+            padding: 12px;
+            border-radius: 7px;
+            border-left: 4px solid #e53e3e;
+        }
+        .risk-good {
+            background: #232326;
+            border-left-color: #38a169;
+        }
+        .positions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+        .positions-table th,
+        .positions-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #232326;
+        }
+        .positions-table th {
+            background: #232326;
+            font-weight: 600;
+            color: #e5e7eb;
+        }
+        .profit {
+            color: #38a169;
+            font-weight: 600;
+        }
+        .loss {
+            color: #e53e3e;
+            font-weight: 600;
+        }
+        .strategy-selector {
+            background: #18181b;
+            border: 2px solid #4f8ef7;
+            border-radius: 7px;
+            padding: 9px;
+            font-weight: 600;
+            color: #4f8ef7;
+        }
+        .analysis-box {
+            background: #232326;
+            border: 1px solid #81e6d9;
+            border-radius: 7px;
+            padding: 12px;
+            margin-top: 8px;
+            font-family: monospace;
+            font-size: 0.95rem;
+            color: #f3f4f6;
+        }
+        .live-price {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #f3f4f6;
+            background: #232326;
+            padding: 8px;
+            border-radius: 7px;
+            text-align: center;
+            margin: 8px 0;
+        }
+        .performance-chart {
+            margin-top: 18px;
+            text-align: center;
+            color: #a1a1aa;
+        }
+        /* Add graph container styling */
+        .stock-graph-container {
+            background: #232326;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+            margin-bottom: 32px;
+            padding: 24px;
+        }
+        .stock-graph-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #e5e7eb;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Trading Dashboard</h1>
+            <p>Advanced Technical Analysis • Risk Management • Multi-Strategy Trading</p>
+        </div>
+
+        <div id="alert" class="alert"></div>
+
+        <!-- Bot Controls -->
+        <div class="card">
+            <h2>
+                <span class="status-indicator" id="statusIndicator"></span>
+                Bot Control & Strategy Selection
+            </h2>
+            <div class="controls">
+                <select id="strategySelect" class="strategy-selector">
+                    <option value="ma_crossover">📈 Moving Average Crossover</option>
+                    <option value="rsi_mean_reversion">📊 RSI Mean Reversion</option>
+                    <option value="bollinger_bands">🎯 Bollinger Bands</option>
+                    <option value="momentum">🚀 Momentum Strategy</option>
+                    <option value="macd">📉 MACD Convergence</option>
+                </select>
+                <button class="btn btn-start" onclick="startBot()">🚀 Start Trading</button>
+                <button class="btn btn-stop" onclick="stopBot()">🛑 Stop Trading</button>
+                <button class="btn btn-secondary" onclick="loadBotStatus()">🔄 Refresh</button>
+            </div>
+            <div class="analysis-box" id="currentAnalysis">
+                No analysis available yet. Start the bot to begin intelligent trading.
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="card">
+            <h2>📊 Portfolio Performance</h2>
+            <div class="grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="portfolioValue">$50,000</div>
+                    <div class="stat-label">Portfolio Value</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalReturn">0.00%</div>
+                    <div class="stat-label">Total Return</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalTrades">0</div>
+                    <div class="stat-label">Total Trades</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="winRate">65.0%</div>
+                    <div class="stat-label">Win Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="cashBalance">$50,000</div>
+                    <div class="stat-label">Cash Balance</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="openPositions">0</div>
+                    <div class="stat-label">Open Positions</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Management -->
+        <div class="card">
+            <h2>🛡️ Risk Management</h2>
+            <div class="grid">
+                <div class="risk-card risk-good" id="drawdownCard">
+                    <div class="stat-value" id="currentDrawdown">0.0%</div>
+                    <div class="stat-label">Current Drawdown</div>
+                </div>
+                <div class="risk-card" id="exposureCard">
+                    <div class="stat-value" id="totalExposure">0.0%</div>
+                    <div class="stat-label">Total Exposure</div>
+                </div>
+                <div class="risk-card risk-good" id="var5Card">
+                    <div class="stat-value" id="var5">$0</div>
+                    <div class="stat-label">Value at Risk (5%)</div>
+                </div>
+                <div class="risk-card" id="maxLossCard">
+                    <div class="stat-value" id="maxPossibleLoss">$0</div>
+                    <div class="stat-label">Max Possible Loss</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Positions -->
+        <div class="card">
+            <h2>📋 Open Positions</h2>
+            <div id="positionsContainer">
+                <p style="text-align: center; color: #718096; padding: 20px;">No open positions</p>
+            </div>
+        </div>
+
+        <!-- Stock Price Graph -->
+        <div class="stock-graph-container">
+            <div class="stock-graph-title">📈 Stock Price Chart</div>
+            <div class="controls">
+                <input type="text" id="symbolInput" placeholder="Symbol (e.g., AAPL)" value="AAPL">
+                <button class="btn btn-secondary" onclick="loadIndicators(); loadStockGraph();">📊 Load Data</button>
+            </div>
+            <canvas id="stockChart" height="80"></canvas>
+        </div>
+        <!-- Live Market Data & Technical Indicators -->
+        <div class="card">
+            <h2>📈 Live Market Data & Technical Indicators</h2>
+            <div class="live-price" id="livePrice">Loading...</div>
+            <div class="indicators-grid" id="indicatorsGrid">
+                <!-- Technical indicators will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Strategy Performance -->
+        <div class="card">
+            <h2>🎯 Strategy Performance</h2>
+            <div id="strategyPerformance">
+                <p style="text-align: center; color: #718096; padding: 20px;">No trading history yet</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let stockChart;
+        async function loadStockGraph() {
+            const symbol = document.getElementById('symbolInput').value || 'AAPL';
+            try {
+                const response = await fetch(`/api/history/${symbol}`);
+                const result = await response.json();
+                console.log('Graph API result:', result); // Debug print
+                if (result.success && result.data && result.data.length > 0) {
+                    const labels = result.data.map(d => d.date);
+                    const prices = result.data.map(d => d.close);
+                    if (stockChart) stockChart.destroy();
+                    const ctx = document.getElementById('stockChart').getContext('2d');
+                    stockChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: `${symbol} Close Price`,
+                                data: prices,
+                                borderColor: '#4f8ef7',
+                                backgroundColor: 'rgba(79,142,247,0.08)',
+                                pointRadius: 0,
+                                fill: true,
+                                tension: 0.2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false },
+                                title: { display: false }
+                            },
+                            scales: {
+                                x: { display: true, title: { display: false } },
+                                y: { display: true, title: { display: false } }
+                            }
+                        }
+                    });
+                } else {
+                    if (stockChart) stockChart.destroy();
+                    document.getElementById('stockChart').getContext('2d').clearRect(0,0,600,80);
+                    console.log('No data for graph:', result);
+                }
+            } catch (error) {
+                console.error('Failed to load stock graph:', error);
+            }
+        }
+        let updateInterval;
+
+        async function startBot() {
+            try {
+                const strategy = document.getElementById('strategySelect').value;
+                const response = await fetch('/api/bot/start', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({strategy: strategy})
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('🚀 ' + result.message, 'success');
+                    updateBotStatus(true);
+                    startAutoRefresh();
+                } else {
+                    showAlert('❌ ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('❌ Failed to start bot: ' + error.message, 'error');
+            }
+        }
+
+        async function stopBot() {
+            try {
+                const response = await fetch('/api/bot/stop', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('🛑 ' + result.message, 'success');
+                    updateBotStatus(false);
+                    stopAutoRefresh();
+                } else {
+                    showAlert('❌ ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('❌ Failed to stop bot: ' + error.message, 'error');
+            }
+        }
+
+        function updateBotStatus(running) {
+            const indicator = document.getElementById('statusIndicator');
+            if (running) {
+                indicator.className = 'status-indicator status-running';
+            } else {
+                indicator.className = 'status-indicator status-stopped';
+            }
+        }
+
+        function startAutoRefresh() {
+            updateInterval = setInterval(() => {
+                loadBotStatus();
+                loadIndicators();
+                loadPositions();
+            }, 5000); // Update every 5 seconds
+        }
+
+        function stopAutoRefresh() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+        }
+
+        async function loadBotStatus() {
+            try {
+                const response = await fetch('/api/bot/status');
+                const status = await response.json();
+                
+                if (response.ok) {
+                    updateBotStatus(status.running);
+                    
+                    // Update performance metrics
+                    document.getElementById('portfolioValue').textContent = 
+                        '$' + status.portfolio_value.toLocaleString(undefined, {maximumFractionDigits: 2});
+                    document.getElementById('totalReturn').textContent = 
+                        (status.total_return * 100).toFixed(2) + '%';
+                    document.getElementById('totalTrades').textContent = status.total_trades;
+                    document.getElementById('winRate').textContent = 
+                        (status.win_rate * 100).toFixed(1) + '%';
+                    document.getElementById('cashBalance').textContent = 
+                        '$' + status.cash.toLocaleString(undefined, {maximumFractionDigits: 2});
+                    document.getElementById('openPositions').textContent = status.positions;
+                    
+                    // Update analysis
+                    const analysisBox = document.getElementById('currentAnalysis');
+                    if (status.last_analysis && status.last_analysis !== 'No analysis yet') {
+                        analysisBox.innerHTML = `
+                            <strong>Latest Signal:</strong> ${status.last_signal}<br>
+                            <strong>Analysis:</strong> ${status.last_analysis}<br>
+                            <strong>Strategy:</strong> ${status.strategy}
+                        `;
+                    }
+                    
+                    // Update risk metrics
+                    if (status.risk_metrics) {
+                        const rm = status.risk_metrics;
+                        document.getElementById('currentDrawdown').textContent = 
+                            (rm.current_drawdown * 100).toFixed(1) + '%';
+                        document.getElementById('totalExposure').textContent = 
+                            (rm.exposure_ratio * 100).toFixed(1) + '%';
+                        document.getElementById('var5').textContent = 
+                            '$' + (rm.var_5pct || 0).toLocaleString(undefined, {maximumFractionDigits: 0});
+                        document.getElementById('maxPossibleLoss').textContent = 
+                            '$' + (rm.max_possible_loss || 0).toLocaleString(undefined, {maximumFractionDigits: 0});
+                        
+                        // Update risk card colors
+                        updateRiskCardColor('drawdownCard', rm.current_drawdown, 0.1);
+                        updateRiskCardColor('exposureCard', rm.exposure_ratio, 0.8);
+                    }
+                    
+                    // Update strategy performance
+                    if (status.strategy_performance) {
+                        updateStrategyPerformance(status.strategy_performance);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load bot status:', error);
+            }
+        }
+
+        function updateRiskCardColor(cardId, value, threshold) {
+            const card = document.getElementById(cardId);
+            if (value > threshold) {
+                card.className = 'risk-card';
+            } else {
+                card.className = 'risk-card risk-good';
+            }
+        }
+
+        async function loadIndicators() {
+            const symbol = document.getElementById('symbolInput').value || 'AAPL';
+            
+            try {
+                // Load current price
+                const priceResponse = await fetch(`/api/data/${symbol}`);
+                const priceData = await priceResponse.json();
+                
+                if (priceData.success) {
+                    document.getElementById('livePrice').textContent = 
+                        `${symbol}: $${priceData.data.price.toFixed(2)}`;
+                }
+                
+                // Load technical indicators
+                const response = await fetch(`/api/indicators/${symbol}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const indicators = result.indicators;
+                    const grid = document.getElementById('indicatorsGrid');
+                    
+                    grid.innerHTML = Object.entries(indicators).map(([name, value]) => {
+                        let displayValue;
+                        if (typeof value === 'number') {
+                            if (name.includes('price') || name.includes('sma') || name.includes('ema') || 
+                                name.includes('bb_')) {
+                                displayValue = '$' + value.toFixed(2);
+                            } else if (name.includes('volume')) {
+                                displayValue = value.toLocaleString();
+                            } else {
+                                displayValue = value.toFixed(2);
+                            }
+                        } else {
+                            displayValue = value;
+                        }
+                        
+                        return `
+                            <div class="indicator-card">
+                                <div class="indicator-name">${formatIndicatorName(name)}</div>
+                                <div class="indicator-value">${displayValue}</div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } catch (error) {
+                console.error('Failed to load indicators:', error);
+            }
+        }
+
+        function formatIndicatorName(name) {
+            const names = {
+                'price': 'Current Price',
+                'sma_20': 'SMA (20)',
+                'sma_50': 'SMA (50)',
+                'ema_20': 'EMA (20)',
+                'rsi': 'RSI',
+                'macd': 'MACD',
+                'macd_signal': 'MACD Signal',
+                'bb_upper': 'BB Upper',
+                'bb_lower': 'BB Lower',
+                'bb_middle': 'BB Middle',
+                'stoch_k': 'Stochastic %K',
+                'stoch_d': 'Stochastic %D',
+                'atr': 'ATR',
+                'williams_r': 'Williams %R',
+                'cci': 'CCI',
+                'volume': 'Volume',
+                'obv': 'OBV',
+                'mfi': 'MFI'
+            };
+            return names[name] || name.toUpperCase();
+        }
+
+        async function loadPositions() {
+            try {
+                const response = await fetch('/api/positions');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const positions = result.positions;
+                    const container = document.getElementById('positionsContainer');
+                    
+                    if (Object.keys(positions).length === 0) {
+                        container.innerHTML = '<p style="text-align: center; color: #718096; padding: 20px;">No open positions</p>';
+                    } else {
+                        container.innerHTML = `
+                            <table class="positions-table">
+                                <thead>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Shares</th>
+                                        <th>Entry Price</th>
+                                        <th>Current Price</th>
+                                        <th>P&L</th>
+                                        <th>P&L %</th>
+                                        <th>Stop Loss</th>
+                                        <th>Take Profit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${Object.entries(positions).map(([symbol, position]) => `
+                                        <tr>
+                                            <td><strong>${symbol}</strong></td>
+                                            <td>${position.shares}</td>
+                                            <td>$${position.entry_price.toFixed(2)}</td>
+                                            <td>$${position.current_price.toFixed(2)}</td>
+                                            <td class="${position.unrealized_pnl >= 0 ? 'profit' : 'loss'}">
+                                                $${position.unrealized_pnl.toFixed(2)}
+                                            </td>
+                                            <td class="${position.unrealized_pnl_pct >= 0 ? 'profit' : 'loss'}">
+                                                ${(position.unrealized_pnl_pct * 100).toFixed(2)}%
+                                            </td>
+                                            <td>$${position.stop_loss ? position.stop_loss.toFixed(2) : 'N/A'}</td>
+                                            <td>$${position.take_profit ? position.take_profit.toFixed(2) : 'N/A'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load positions:', error);
+            }
+        }
+
+        function updateStrategyPerformance(strategyPerf) {
+            const container = document.getElementById('strategyPerformance');
+            
+            if (Object.keys(strategyPerf).length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #718096; padding: 20px;">No trading history yet</p>';
+            } else {
+                container.innerHTML = `
+                    <div class="grid">
+                        ${Object.entries(strategyPerf).map(([strategy, perf]) => `
+                            <div class="stat-card">
+                                <div class="stat-value">${formatStrategyName(strategy)}</div>
+                                <div class="stat-label">
+                                    Trades: ${perf.trades} | 
+                                    Win Rate: ${(perf.win_rate * 100).toFixed(1)}% |
+                                    Avg P&L: $${perf.avg_pnl.toFixed(2)}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        }
+
+        function formatStrategyName(strategy) {
+            const names = {
+                'ma_crossover': '📈 MA Crossover',
+                'rsi_mean_reversion': '📊 RSI Mean Rev',
+                'bollinger_bands': '🎯 Bollinger Bands',
+                'momentum': '🚀 Momentum',
+                'macd': '📉 MACD'
+            };
+            return names[strategy] || strategy;
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadBotStatus();
+            loadIndicators();
+            loadStockGraph();
+            loadPositions();
+        });
+    </script>
+</body>
+</html>

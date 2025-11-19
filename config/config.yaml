@@ -1,0 +1,101 @@
+# Trading Bot Configuration Template
+# This is the template config file .Copy this file to config.yaml and fill in your API keys and parameters
+
+# Initial capital for trading
+initial_capital: 100000
+
+# List of symbols to trade
+symbols:
+  - AAPL
+  - GOOGL
+  - MSFT
+  - TSLA
+
+# Data source configuration
+data_source: yahoo  # Options: yahoo, alpha_vantage, binance
+update_interval: 60  # Update interval in seconds
+
+# API Keys (keep these secure!)
+api_keys:
+  finnhub_api_key: "d465hppr01qj716ff080d465hppr01qj716ff08g"
+  alpha_vantage_api_key: "YOUR_ALPHA_VANTAGE_KEY_HERE"
+  binance_api_key: "YOUR_BINANCE_API_KEY_HERE"
+  binance_secret_key: "YOUR_BINANCE_SECRET_KEY_HERE"
+  
+# Trading strategies configuration
+strategies:
+  ma_crossover:
+    enabled: true
+    short_window: 20
+    long_window: 50
+    ma_type: "sma"  # sma or ema
+    
+  rsi_mean_reversion:
+    enabled: true
+    rsi_period: 14
+    oversold_level: 30
+    overbought_level: 70
+    
+  bollinger_bands:
+    enabled: false
+    window: 20
+    num_std: 2.0
+    
+  momentum:
+    enabled: false
+    lookback_period: 20
+    momentum_threshold: 0.02
+    trend_confirmation_period: 5
+
+# Risk management parameters
+risk_management:
+  max_position_size: 0.10        # Maximum 10% of portfolio per position
+  max_daily_loss: 0.02           # Maximum 2% daily loss
+  max_total_drawdown: 0.15       # Maximum 15% total drawdown
+  default_stop_loss: 0.05        # Default 5% stop loss
+  default_take_profit: 0.10      # Default 10% take profit
+  max_correlation: 0.7           # Maximum correlation between positions
+  risk_free_rate: 0.02           # Risk-free rate for Sharpe ratio
+
+# Backtesting parameters
+backtesting:
+  commission: 0.001              # 0.1% commission rate
+  slippage: 0.0005              # 0.05% slippage
+  margin_requirement: 1.0        # No leverage
+
+# Logging configuration
+logging:
+  level: INFO                    # DEBUG, INFO, WARNING, ERROR
+  file: "logs/trading_bot.log"
+  max_file_size: "10MB"
+  backup_count: 5
+
+# Database configuration (optional)
+database:
+  enabled: false
+  type: "sqlite"                 # sqlite, postgresql, mysql
+  path: "data/trading_data.db"
+  
+# Notification settings
+notifications:
+  enabled: false
+  email:
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    username: "your_email@gmail.com"
+    password: "your_app_password"
+    recipients:
+      - "trader@example.com"
+  
+  webhook:
+    enabled: false
+    url: "https://hooks.slack.com/your/webhook/url"
+
+# Paper trading vs live trading
+trading_mode: "paper"            # paper or live
+
+# Performance monitoring
+monitoring:
+  save_equity_curve: true
+  save_trades: true
+  performance_report_interval: 3600  # Generate report every hour

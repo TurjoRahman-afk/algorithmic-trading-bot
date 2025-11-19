@@ -1,0 +1,20 @@
+// System Architecture
+digraph {
+	A [label="Data Sources
+(Yahoo, Finnhub, Alpha Vantage)"]
+	B [label="Data Collector"]
+	C [label="Feature Engineering"]
+	D [label="ML Model"]
+	E [label="Trading Strategies"]
+	F [label="Risk Manager"]
+	G [label="Trading Bot"]
+	H [label="Broker/Exchange
+(Order Execution)"]
+	A -> B
+	B -> C
+	C -> D
+	D -> E
+	E -> G
+	F -> G
+	G -> H
+}

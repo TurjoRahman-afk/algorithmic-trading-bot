@@ -1,10 +1,13 @@
-<img width="1045" height="575" alt="Screenshot 2025-11-19 at 5 51 46 PM" src="https://github.com/user-attachments/assets/bd1dc1c0-a19b-415e-8d0e-eda23a701755" /># Algorithmic Trading Bot
+
 
 >A modular, machine learning-driven trading platform for equities and crypto. Features robust data collection, strategy backtesting, risk management, live/paper trading, and ML integration for predictive signals. Includes an interactive dashboard and reproducible experiment workflow.
 
 ---
 
 ## 🚀 Key Features
+
+<img width="947" height="504" alt="Screenshot 2025-11-19 at 5 51 58 PM" src="https://github.com/user-attachments/assets/fbd34fb6-2de1-4a5e-b7c5-e92611a29d31" />
+
 - Unified data collection (Yahoo, Alpha Vantage, Finnhub, Binance)
 - ML model training, evaluation, and integration
 - Multiple trading strategies (rule-based & ML-based)

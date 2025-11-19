@@ -1,4 +1,4 @@
-# Algorithmic Trading Bot
+<img width="1045" height="575" alt="Screenshot 2025-11-19 at 5 51 46 PM" src="https://github.com/user-attachments/assets/bd1dc1c0-a19b-415e-8d0e-eda23a701755" /># Algorithmic Trading Bot
 
 >A modular, machine learning-driven trading platform for equities and crypto. Features robust data collection, strategy backtesting, risk management, live/paper trading, and ML integration for predictive signals. Includes an interactive dashboard and reproducible experiment workflow.
 
@@ -12,6 +12,7 @@
 - Backtesting engine with performance metrics
 - Interactive dashboard for live/historical results
 - Configurable via YAML files
+
 
 ## 📂 Project Structure
 ```
@@ -29,6 +30,7 @@ README.md      # Project documentation
 requirements.txt # Python dependencies
 setup.sh       # Setup script
 ```
+<img width="1045" height="575" alt="Screenshot 2025-11-19 at 5 51 46 PM" src="https://github.com/user-attachments/assets/0202945d-cede-4515-8b46-3f571beb1d89" />
 
 ## 🤖 How Machine Learning Works in This Project
 
@@ -96,6 +98,9 @@ This modular approach lets you experiment with rule-based and machine learning-d
 - **Evaluation**: Per-stock, per-strategy, reproducible scripts
 - **Reporting**: Automated metrics table, experiment summary
 
+<img width="992" height="523" alt="Screenshot 2025-11-19 at 5 52 18 PM" src="https://github.com/user-attachments/assets/644ed76c-ddf6-493c-9597-b8e9e66bd5a3" />
+
+
 ## 🛡 Risk Management
 - Stop Loss, Take Profit, Position Sizing, Max Drawdown
 - Configurable via YAML
@@ -122,6 +127,8 @@ python -m pytest tests/
 
 ## ⚠️ Disclaimer
 This software is for educational and research purposes only. Algorithmic trading involves substantial risk of loss. Never risk money you cannot afford to lose. The authors are not responsible for any financial losses incurred using this software.
+
+<img width="1045" height="573" alt="Screenshot 2025-11-19 at 5 52 30 PM" src="https://github.com/user-attachments/assets/24d32432-008c-4113-9cc9-26990d27d470" />
 
 ## 📝 License
 This project is licensed under the MIT License - see the LICENSE file for details.
